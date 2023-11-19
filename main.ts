@@ -1,13 +1,12 @@
 import { Application, Router } from "https://deno.land/x/oak/mod.ts"
 import {
     errorResponse,
-    getAllEventLogs,
-    getLogsByKey,
+    getEvents,
     isAuthorized,
     logEvent,
     setHeaders
 } from './helpers.ts'
-
+import { Event } from './helpers.ts'
 
 const port = 8000
 const db = await Deno.openKv()
@@ -23,9 +22,14 @@ router.post('/events', async (ctx) => {
 
     try {
         const body = ctx.request.body({ type: 'json' });
-        const { key, event } = await body.value
+        const { source, message } = await body.value
+        const event: Event = {
+            source,
+            message,
+            createdAt: new Date().toISOString()
+        }
 
-        await logEvent(db, key, event)
+        await logEvent(db, event)
     } catch (e) {
         errorResponse(ctx, e)
     }
@@ -38,19 +42,7 @@ router.post('/events', async (ctx) => {
 router.get('/events', async (ctx) => {
     if (!isAuthorized(ctx)) return
     try {
-        ctx.response.body = await getAllEventLogs(db)
-    } catch (e) {
-        errorResponse(ctx, e)
-    }
-})
-
-router.get('/events/:eventKey', async (ctx) => {
-    if (!isAuthorized(ctx)) return
-    const eventKey = ctx.params.eventKey
-
-    try {
-        setHeaders(ctx)
-        ctx.response.body = await getLogsByKey(db, eventKey)
+        ctx.response.body = await getEvents(db)
     } catch (e) {
         errorResponse(ctx, e)
     }
