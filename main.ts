@@ -1,5 +1,12 @@
 import { Application, Router } from "https://deno.land/x/oak/mod.ts"
-import { EventLogs, isAuthorized, logEvent, setHeaders } from './helpers.ts'
+import {
+    errorResponse,
+    getAllEventLogs,
+    getLogsByKey,
+    isAuthorized,
+    logEvent,
+    setHeaders
+} from './helpers.ts'
 
 
 const port = 8000
@@ -20,30 +27,32 @@ router.post('/events', async (ctx) => {
 
         await logEvent(db, key, event)
     } catch (e) {
-        console.error(e)
-        ctx.response.status = 500
-        ctx.response.body = 'something went wrong'
+        errorResponse(ctx, e)
     }
 
     setHeaders(ctx)
     ctx.response.body = 'event logged'
 })
 
-export const getLogs = async (db: Deno.Kv, eventKey: string): Promise<EventLogs> => {
-    const kvResponse = await db.get([eventKey])
-    const eventLogs: EventLogs = kvResponse.value as EventLogs ?? []
 
-    return eventLogs
-}
+router.get('/events', async (ctx) => {
+    if (!isAuthorized(ctx)) return
+    try {
+        ctx.response.body = await getAllEventLogs(db)
+    } catch (e) {
+        errorResponse(ctx, e)
+    }
+})
 
 router.get('/events/:eventKey', async (ctx) => {
+    if (!isAuthorized(ctx)) return
     const eventKey = ctx.params.eventKey
 
     try {
         setHeaders(ctx)
-        ctx.response.body = await getLogs(db, eventKey)
+        ctx.response.body = await getLogsByKey(db, eventKey)
     } catch (e) {
-        console.error(e)
+        errorResponse(ctx, e)
     }
 })
 
