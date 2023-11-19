@@ -1,6 +1,6 @@
 import { env } from './constants.ts'
 
-const authorization = env.DENO_EVENTS_API_AUTHORIZATION
+const authorization = env.API_AUTHORIZATION_KEY
 
 export const isAuthorized = (ctx: any) => {
     const requestToken = ctx.request.headers.get('Authorization')
