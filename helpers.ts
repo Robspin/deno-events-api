@@ -32,7 +32,8 @@ export const logEvent = async (db: Deno.Kv, event: Event) => {
 
 export const getEvents = async (db: Deno.Kv): Promise<Event[]> => {
     const kvResponse = await db.get(['events'])
-    return (kvResponse.value as unknown) as Event[] ?? []
+    const events = (kvResponse.value as unknown) as Event[] ?? []
+    return events.reverse()
 }
 
 export const errorResponse = (ctx: any, e: any) => {
