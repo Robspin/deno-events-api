@@ -22,10 +22,11 @@ router.post('/events', async (ctx) => {
 
     try {
         const body = ctx.request.body({ type: 'json' });
-        const { source, message } = await body.value
+        const { source, message, sendNotification } = await body.value
         const event: Event = {
             source,
             message,
+            sendNotification: sendNotification ?? false,
             createdAt: new Date().toISOString()
         }
 
