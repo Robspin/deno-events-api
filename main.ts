@@ -1,4 +1,4 @@
-import { Application, Router } from "https://deno.land/x/oak/mod.ts"
+import { Application, Router } from "https://deno.land/x/oak@v13.0.0/mod.ts"
 import {
     errorResponse,
     getEvents,
