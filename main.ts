@@ -21,8 +21,7 @@ router.post('/events', async (ctx) => {
     if (!isAuthorized(ctx)) return
 
     try {
-        const body = ctx.request.body({ type: 'json' });
-        const { source, message, sendNotification } = await body.value
+        const { source, message, sendNotification } = await ctx.request.body.json()
         const event: Event = {
             source,
             message,
